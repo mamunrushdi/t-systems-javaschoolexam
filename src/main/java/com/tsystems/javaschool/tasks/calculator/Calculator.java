@@ -18,7 +18,7 @@ public class Calculator
 	
 	public String evaluate(String str)
 	{
- 		//this variable will store the total sum of the arithmetic calculation
+		 //this variable will store the total sum of the arithmetic calculation
  		double sum = 0.0; 
  		
  		//if there is any white spaces in the string, we will remove them
@@ -28,12 +28,10 @@ public class Calculator
  		//if string is invalid, we will return null
     	if(!confirmValidity(str)) return null;
 
+    	 //if string contains parentheses, we will compute the parentheses part first
+		if(str.contains("("))	str = computeParenthesesBlocks(str);
     	
-    	    	
-    	//if string contains parentheses, we will compute the parentheses part first
-		if(str.contains("(")) str = computeParenthesesPart(str);
-  
-		
+ 
 		//after solvong parentheses part, we will again check the validity
 		//as the result will be return as String
 		if(!confirmValidity(str)) return null;
@@ -91,12 +89,9 @@ public class Calculator
 				sum += getDivisionResult(byPluses[i]);
 			 
 		}//end of for loop  
-		
-		//return the result in String format after performing rounding operation
-   
-		return roundDigit(sum);
+		 //return the result in String format having rounded
+		return roundDigit(sum); 
 	}
-	
 	//helper method to perofrm rounding to 4 significant digits
 	// Example: 102.12356 -> 102.1236
 	private static String roundDigit(double digit)
@@ -106,7 +101,51 @@ public class Calculator
 		
 		return df.format(digit);
 	}
-		
+	/**helper method to compute parentheses block  
+	 * we will compute one by one parentheses block, start from the inner most block
+	 *
+	 * @param string with parentheses block
+	 */
+	private  String computeParenthesesBlocks(String str)
+	{ 
+		int parenthesese  = getTotalParenthesesBlock(str);
+		 
+		while (parenthesese > 0)
+		{			
+			//first we will find the inner most open parenthesis
+			int inrMostOpnPthns = str.lastIndexOf('('); 
+			
+			//now we will find first close parenthesis from innerMostParenthsese
+			int inrMostClsPthns = str.indexOf(')', inrMostOpnPthns); 
+			
+			//now we will get the inner most parentheses block
+			String innMstPrtSubStr = str.substring(inrMostOpnPthns, inrMostClsPthns +1); 
+			
+			//System.out.println("4innMstPrtSubStr: " + innMstPrtSubStr);
+			//now we will compute this part
+
+			String result = computeSingleParenthesesBlock(innMstPrtSubStr);
+			
+			//now replace the result with inner most parentheses block
+			if(result == null) str = str.replace(innMstPrtSubStr, "0");
+			else str = str.replace(innMstPrtSubStr, result);
+		   
+			parenthesese  = getTotalParenthesesBlock(str);
+		}
+		 
+		return str;
+	}
+
+	//get total number of parentheses block
+	private int getTotalParenthesesBlock(String str)
+	{
+		int counter = 0;
+		for(int i = 0; i < str.length(); i++)
+			if(str.charAt(i) == '(') counter++;
+		return counter;
+	}
+
+
 	//helper method to calculate multplication (*)
 	private double getMultiplyResult(String string) 
 	{
@@ -167,35 +206,27 @@ public class Calculator
 	 *   will returs in String format
 	 * @return "8 + 15 - 4"
 	 */
-	private String computeParenthesesPart(String s)
+	private String computeSingleParenthesesBlock(String str)
 	{
-		//we are using StringBuilde for having flexibility with mutable operations
-		StringBuilder str = new StringBuilder(s); 
+		String result = "";
 		
-		for(int i = 0; i < str.length(); i++)
+		//find the start index of the open parentheses
+		if(str.indexOf("(") != -1)
 		{
-			//find the start index of the open parentheses
-			if(str.indexOf("(", i) != -1)
-			{
-				int startInd = str.indexOf("(", i);
- 				//get end of close parentheses
-				int endInd = str.indexOf(")", startInd + 1);
-				
-				//get arithmetical part between parentheses
-				String subStr = str.substring(startInd+1, endInd);
-				
-				//calculate the subStr and replace it to the original string
-				String result  = evaluate(subStr);;
-				if(result == null) str.replace(startInd, endInd+1, "0");
-				else str.replace(startInd, endInd+1, result);
-				
-				//update i by endInd index
-				i = endInd;
- 			}
-		}  
-		return str.toString(); 
+			int startInd = str.indexOf("(");
+			//get end of close parentheses
+			int endInd = str.indexOf(")", startInd + 1);
+			
+			//get arithmetical part between parentheses
+			String subStr = str.substring(startInd+1, endInd);
+			System.out.println("string in1 paretheses: " + subStr);
+			//calculate the subStr and replace it to the original string
+			result  = evaluate(subStr);;
+		}
+		 
+		return result; 
 	}
-	  
+	
 	//helper method to fix the minus operand when it is adjacent to * or / on both sides
 	private String correctMisplacedPluses(String noMinuses, String str) 
 	{
@@ -291,7 +322,8 @@ public class Calculator
 			ind = ind + 1;
 			 if(ind < str.length() - 1)
 				ch = str.charAt(ind);
-		}			
+		}	
+		
 		//now we will check if after / sign, the immediate operand is -
 		// we will get the minus index
 		int minusIndex = ind; 
@@ -318,3 +350,4 @@ public class Calculator
 	}
 
 }	
+	

@@ -6,7 +6,34 @@ import org.junit.Test;
 public class CalculatorTest {
 
     private Calculator calc = new Calculator();
- 
+    
+    //customized test to test multiple parentheses blocks
+    @Test
+    public void evaluateKM() {
+        //given
+        String input = "(((1+38)*4-5) * 2)";
+        String expectedResult = "302";
+
+        //run
+        String result = calc.evaluate(input);
+
+        //assert
+        Assert.assertEquals(expectedResult, result);
+    }
+    //customized test
+    @Test
+	public void evaluate0() {
+	      //given
+	  String input = "7*6/2+8";
+	  String expectedResult = "29";
+	
+	  //run
+	  String result = calc.evaluate(input);
+	
+	  //assert
+	      Assert.assertEquals(expectedResult, result);
+	  }
+    
     @Test
     public void evaluate() {
         //given
